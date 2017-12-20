@@ -84,11 +84,21 @@ table {
 }
 .highlight{
     background: #42A948; /* green */
-    
+}
+.hover:hover{
+    background-color: grey;
+}
+
+/* Concordance Tab Header*/
+.concordancertab{
+    margin: auto;
+    width: 200px;
+    margin-bottom: 10px !important;
+    margin-top: 10px !important;
 }
 
 /*For Material Table */
-.example-container {
+.filelist-container {
     display: flex;
     flex-direction: column;
     min-width: 300px;
@@ -96,9 +106,8 @@ table {
   
   .mat-table {
     overflow: auto;
-    max-height: 330px;
   }
-  
+
   .mat-header-cell.mat-sort-header-sorted {
     color: black;
   }
@@ -188,4 +197,11 @@ table {
 .icon-addon .form-control:focus + .fa,
 .icon-addon:hover .fa {
     color: #2580db;
+}
+
+/* For Search Box */
+
+/* -----------For highlighting the db name*/
+.highlightdbname{
+color: #42A948;
 }

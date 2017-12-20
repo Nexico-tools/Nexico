@@ -9,16 +9,22 @@ import { PouchdbService } from "./pouchdb.service";
 import { Ng4FilesModule } from './angular4-files-upload';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { DataTableModule, SharedModule } from 'primeng/primeng';
-import { MatTabsModule, MatDialogModule, MatButtonModule, MatInputModule, MatTableModule } from '@angular/material';
+import { MatTabsModule, MatDialogModule, MatButtonModule, MatInputModule, MatTableModule, MatSortModule, MatCheckboxModule, MatRadioModule, MatProgressBarModule, MatMenuModule, MatIconModule, MatListModule } from '@angular/material';
 import { DbnamedialogComponent } from './dbnamedialog/dbnamedialog.component';
+import { FusiondialogComponent } from './fusiondialog/fusiondialog.component';
+import { WizardoneComponent } from './wizardone/wizardone.component';
 
 @NgModule({
   declarations: [
     AppComponent,
-    DbnamedialogComponent
+    DbnamedialogComponent,
+    FusiondialogComponent,
+    WizardoneComponent
   ],
   entryComponents: [
-    DbnamedialogComponent
+    DbnamedialogComponent,
+    FusiondialogComponent,
+    WizardoneComponent 
   ],
   imports: [
     BrowserModule,
@@ -32,9 +38,16 @@ import { DbnamedialogComponent } from './dbnamedialog/dbnamedialog.component';
     MatDialogModule,
     MatButtonModule, 
     MatInputModule,
-    MatTableModule
+    MatTableModule,
+    MatSortModule,
+    MatCheckboxModule,
+    MatRadioModule,
+    MatProgressBarModule,
+    MatMenuModule,
+    MatIconModule,
+    MatListModule
   ],
-  exports: [ MatTabsModule, MatDialogModule, MatButtonModule, MatInputModule, MatTableModule ],
+  exports: [ MatTabsModule, MatDialogModule, MatButtonModule, MatInputModule, MatTableModule, MatSortModule, MatCheckboxModule, MatRadioModule, MatProgressBarModule, MatMenuModule, MatIconModule, MatListModule ],
   providers: [PouchdbService],
   bootstrap: [AppComponent]
 })

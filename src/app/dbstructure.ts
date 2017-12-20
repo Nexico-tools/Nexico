@@ -19,6 +19,7 @@ export class TableDataStructure{
     content: string;
     date: string;
     fullcontent: string;
+    datauri : string;
     constructor(){
         this.id = 0;
         this.url = "";
@@ -40,5 +41,20 @@ export class AnalysisDataStructure{
         this.freq = 0;
         this.total= 0;
         this.spec = 0;
+    }
+}
+
+export class ConcordancerStructure{
+    url: string;
+    left_context: string;
+    search_terms: string;
+    right_context: string;
+    datauri : string;
+   
+    constructor(){
+        this.url = "";
+        this.left_context = "";
+        this.search_terms = "";
+        this.right_context= "";
     }
 }
