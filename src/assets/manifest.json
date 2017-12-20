@@ -1,0 +1,17 @@
+{
+    "name": "Nexico",
+    "description": "Tool for for scraping and analyzing textual data",
+    "version": "0.1",
+    "incognito": "split",
+    "browser_action": {
+       "default_icon": "assets/nexico.fav.png"
+    },
+    "icons": { "281": "assets/nexico.fav.png" },
+    "permissions": ["tabs","https://*/", "http://*/"],
+    "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'",
+    "background" :{
+        "scripts":["background.js"],
+        "persistent": false
+    },
+    "manifest_version": 2
+}

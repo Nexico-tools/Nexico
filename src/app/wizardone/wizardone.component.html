@@ -1,0 +1,33 @@
+<h1 mat-dialog-title>Corpus Wizard</h1>
+
+<mat-dialog-content style = "height: 70%;">
+
+    <mat-form-field style = "width : 100%;">
+        <input matInput tabindex="1" [(ngModel)]="inputurl" placeholder="Input the New Database Name" style="margin-top:10px">
+    </mat-form-field>
+	<button mat-button (click)= "onAdd()" style="width: 100%;" >Add To Url List</button>
+	
+	<div style = "overflow: auto; height: 200px;border:1px solid black; box-shadow: 2px 2px #888888;">
+		<mat-list>
+			<mat-list-item *ngFor = "let i of urllist" style = "height: 20px">{{ i }}</mat-list-item>
+		</mat-list>
+	</div>
+	<mat-radio-group style = "display: grid" [(ngModel)] = "optionvalue" (change) = "onValueChange()">
+
+		<mat-radio-button value="1" style="margin-top: 20px">Only take given URL or search results</mat-radio-button>
+		<mat-radio-button value="2" style="margin-top: 20px">Follow links</mat-radio-button>
+
+		<mat-radio-group style = "display : none;"[(ngModel)] = "optionvalue1" id = "radiogroup2" >
+			<mat-radio-button value="1" style="margin-top: 20px" >Of domain</mat-radio-button>
+			<mat-radio-button value="2" style="margin-top: 20px">Regex</mat-radio-button>
+            <mat-form-field>
+                <input matInput tabindex="1" [(ngModel)]="inputregexp" placeholder="Regex" style="margin-top:10px">
+            </mat-form-field>
+		</mat-radio-group>
+	</mat-radio-group>
+</mat-dialog-content>
+
+<mat-dialog-actions style = "float: right">
+  <button mat-button (click)="onYesClick()" tabindex="2">OK</button>
+  <button mat-button (click)="onNoClick()" tabindex="-1">No Thanks</button>
+</mat-dialog-actions>

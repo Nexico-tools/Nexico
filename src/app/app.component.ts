@@ -1,23 +1,35 @@
-import { Component, OnInit, NgZone } from '@angular/core';
+import { Component, OnInit, NgZone, ViewChild } from '@angular/core';
 import { ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
 
-import { PouchdbService } from "./pouchdb.service";
+import { PouchdbService } from './pouchdb.service';
 import { Ng4FilesStatus, Ng4FilesSelected } from './angular4-files-upload';
-import { DbnamedialogComponent } from './dbnamedialog/dbnamedialog.component'; 
-import { MatDialog, MatTableDataSource, MatSort } from '@angular/material';
-import { DbStructure, TableDataStructure, AnalysisDataStructure } from './dbstructure';
+import { DbnamedialogComponent } from './dbnamedialog/dbnamedialog.component';
+import { FusiondialogComponent } from './fusiondialog/fusiondialog.component';
+import { WizardoneComponent } from './wizardone/wizardone.component';
+import { MatDialog, MatTableDataSource, MatSort, MatMenu } from '@angular/material';
+import { DbStructure, TableDataStructure, AnalysisDataStructure, ConcordancerStructure } from './dbstructure';
+
+import {Subscription} from "rxjs";
+import {TimerObservable} from "rxjs/observable/TimerObservable";
+
 import { Stat } from './config/Stat';
+import * as Crawler from 'js-crawler';
 // const toFile = require('data-uri-to-file');
 
 @Component({
     selector: 'app-root',
     templateUrl: './app.component.html',
-    styleUrls: ['./app.component.css'] 
+    styleUrls: ['./app.component.css']
 })
 export class AppComponent implements OnInit {
 
+    @ViewChild('analysissort') analysissort: MatSort;
+
+    @ViewChild('filesort') filesort: MatSort;
+
+    @ViewChild('concordancersort') concordancersort: MatSort;
+
     public people: Array<any>;
-    public form: any;
     public selectedFiles;
 
     public indexDbList:Array<Array<any>>;
@@ -28,39 +40,61 @@ export class AppComponent implements OnInit {
     public indexDbContent : DbStructure;  // temporary index Db Content
 
     analysisStructure : Array<AnalysisDataStructure>;
+    analysisdataSource : any;
+    analysisColumns = ['form','freq','total','spec'];
+
     tableStructure : TableDataStructure[];
-    dataSource : any;
-    displayedColumns = ['url', 'type', 'token', 'content', 'date'];    
+    filedataSource : any;
+    displayedColumns = ['url', 'type', 'token', 'content', 'date'];
     selectedRow : TableDataStructure;
     selectedAnalysisRow : AnalysisDataStructure;
-    flag : boolean = false;    
+    flag : boolean = false;
     dbfullcontent : any;
 
-    public constructor(private database: PouchdbService, private zone: NgZone, public dialog : MatDialog, private ref:ChangeDetectorRef) {
-        
+    // SectionMap tag variable
+    mouseFlag : boolean = false;
+    checkBoxValue = [];
+    countPage : number;
+
+    // Concordancer Tab Variable
+    searchterm : string;
+    concordancerStructure : ConcordancerStructure[];
+    concordancerdataSource : any;
+    concordancerColumns = ['url', 'left_context', 'search_terms', 'right_context'];
+    concordancerSelectedRow : ConcordancerStructure;
+    concordancerProgress : number;
+    concordancerProgressFileName : string;
+    //Export Tab Variable
+    optionvalue1 : any;
+    optionvalue2 : any;
+    optionvalue3 : any;
+
+    // Timer
+
+    private subscription: Subscription;
+
+    public constructor(private database: PouchdbService, private zone: NgZone, public dialog : MatDialog, public fusiondialog:MatDialog, private ref:ChangeDetectorRef) {
         this.indexDbContent = new DbStructure();
-        // this.tableStructure = [];
-        // this.dataSource = new MatTableDataSource<TableDataStructure>(this.tableStructure);
         this.dbfullcontent = [];
         this.analysisStructure = [];
         this.indexDbList = [];
         this.indexDbLength = 0;
         this.people = [];
+        this.countPage = 0;
         this.indexDbHeader = {
             "pages" : 0,
             "types": 0,
             "tokens" : 0,
             "date" : "2017-01-01"
         };
-        this.form = {
-            "username": "",
-            "firstname": "",
-            "lastname": ""
-        }
+
+        this.concordancerdataSource = new MatTableDataSource<ConcordancerStructure>(this.concordancerStructure);
+        this.concordancerProgress = 0;
+        this.concordancerProgressFileName = "";
     }
+
     public ngOnInit() {
         // this.database.sync("http://localhost:4984/extension");
-
         this.database.getChangeListener().subscribe(data => {
             let ii = this.indexDbLength;
             for(let i = 0; i < data.change.docs.length; i++) {
@@ -81,7 +115,7 @@ export class AppComponent implements OnInit {
                 this.selectedIndexDbName = this.indexDbList[0][0].dbname;
                 this.getTableStructure(this.indexDbList[0][0]);
             }
-        }, 
+        },
         error => {
             console.error(error);
         });
@@ -91,16 +125,45 @@ export class AppComponent implements OnInit {
         console.log("AnalysisTable");
     }
 
-    public onTableRowSelect(row : any){
+    public onConcordancer(row: any){
+        this.concordancerSelectedRow = row;
+    }
+
+    public onTableRowSelect(row : any, mode: boolean){
         this.selectedRow = row;
         this.analysisStructure = [];
-        let stat : any;
+        var stat : any;
         let res = this.selectedRow.fullcontent;
-        stat = new Stat(this.dbfullcontent, 5);
-        // let selection=(new Array<number>(parts.length)); // selection=[0,1];  
-        // for (let i = 0; i < selection.length; i++)
-        //    selection[i] = i;
-        let selection=[row.id-1];
+        
+        let selection = [];
+        
+        stat = new Stat(this.dbfullcontent, 5);       
+        if(mode){
+            let tempfullcontent=[];
+            tempfullcontent.push(this.selectedRow.fullcontent);
+            let pagestat = new Stat(tempfullcontent, 5);
+            this.selectedRow.type = pagestat.nbtypes;
+            this.selectedRow.token = pagestat.nbtokens;
+
+            let count = 0, i, j = 0;
+            for(i in this.checkBoxValue){
+                if(this.checkBoxValue[i])
+                    count++;
+            }
+            console.log("Count"+count);
+            this.countPage = count;
+            selection = new Array<number>(count); // selection=[0,1];  
+            for(i in this.checkBoxValue){
+                if(this.checkBoxValue[i])
+                    selection[j++] = i;
+            }
+            console.log("AAAA"+selection);
+        }
+        else {
+            selection=[row.id-1];
+            this.countPage = 1;
+        }
+
         var specobjects = stat.selectiontypes(selection).map(function(ty){ 
 		    return Object.assign({type:ty}, stat.selectionSpec(selection,ty)); 
         });
@@ -110,32 +173,48 @@ export class AppComponent implements OnInit {
         for(var i = 0; i < specobjects.length; i++){
             let temp : AnalysisDataStructure;
             temp = new AnalysisDataStructure();
-            
-            if(specobjects[i]["type"].length > 15)
-                temp.form = specobjects[i]["type"].slice(0,15) + '...';
-            else
-                temp.form = specobjects[i]["type"];
-            temp.freq = specobjects[i]["freqInSel"];
-            temp.total = specobjects[i]["totalFreqOfTok"];
-            let num = specobjects[i]["specInSel"];
-            temp.spec = num.toPrecision(8);
-            this.analysisStructure = [...this.analysisStructure, temp];
+            // if(specobjects[i]["freqInSel"] != 0){
+                if(specobjects[i]["type"].length > 10)
+                    temp.form = specobjects[i]["type"].slice(0,10) + '...';
+                else
+                    temp.form = specobjects[i]["type"];
+                temp.freq = specobjects[i]["freqInSel"];
+                temp.total = specobjects[i]["totalFreqOfTok"];
+                let num = specobjects[i]["specInSel"];
+                temp.spec = num.toPrecision(6);
+                this.analysisStructure = [...this.analysisStructure, temp];
+            // }
         }
+
+        // Get the Analysis Table Data.
+
+        this.analysisdataSource = new MatTableDataSource<AnalysisDataStructure>(this.analysisStructure);
+        this.analysisdataSource.sortingDataAccessor = (data: AnalysisDataStructure, property: string) => {
+            switch (property) {
+              case 'form': return data.form;
+              case 'spec': return +data.spec;
+              case 'total': return +data.total;
+              case 'freq': return +data.freq;
+              default: return '';
+            }
+        };
+        this.analysisdataSource.sort = this.analysissort;
         // console.log(this.analysisStructure);
     }
 
-    public getTableStructure(temp : DbStructure){
+    public getTableStructure(temp : DbStructure) {
         // console.log("Table Structure Function");
-        
-        //Clear TableStructure Data
+
+        // Clear TableStructure Data
         this.tableStructure = [];
         this.dbfullcontent = [];
+        this.checkBoxValue = [];
         this.flag = false;
         let types = 0;
         let token = 0;
         let length = temp.datauri.length;
         let count = length;
-        for(var i = 0; i < length; i++){
+        for(var i = 0; i < length; i++) {
             let item;
             item = new TableDataStructure();
             
@@ -144,6 +223,7 @@ export class AppComponent implements OnInit {
             else
                 item.url = temp.filename[i].slice(0,39) + '......' + temp.filename[i].slice(temp.filename[i].length - 40, temp.filename[i].length);
             item.date = temp.date[i];
+            item.datauri = temp.datauri[i];
             const dataURI = temp.datauri[i];
             const fileReader = new FileReader();
             fileReader.onload = () => {
@@ -156,7 +236,6 @@ export class AppComponent implements OnInit {
                 item.type = tempstat.nbtypes;
                 item.token= tempstat.nbtokens;
                 item.id = length - count;
-                console.log(item);
                 this.dbfullcontent.push(res.replace(/\/?\<.*\>/g," ").replace(/\s+/g," "));
                 if(res.length < 20){
                     item.content = res;
@@ -171,20 +250,34 @@ export class AppComponent implements OnInit {
                     this.indexDbHeader["token"] =stat.nbtokens;
                     this.tableStructure = [...this.tableStructure, item];
                     // console.log(this.tableStructure);
-                    this.dataSource = new MatTableDataSource<TableDataStructure>(this.tableStructure);
-                    this.onTableRowSelect(this.selectedRow);
+                    this.filedataSource = new MatTableDataSource<TableDataStructure>(this.tableStructure);
+                    this.filedataSource.sortingDataAccessor = (data: TableDataStructure, property: string) => {
+                        switch (property) {
+                            case 'url': return data.url;
+                            case 'type': return +data.type;
+                            case 'token': return +data.token;
+                            case 'content': return data.content;
+                            case 'date': return data.date;
+                            default: return '';
+                        }
+                    };
+                    this.filedataSource.sort = this.filesort;
+
+                    if(!this.flag )
+                        this.selectedRow = this.tableStructure[0];
+                    this.onTableRowSelect(this.selectedRow, false);
                    
-                    console.log(this.dataSource);
+                    // console.log(this.filedataSource);
                 }
                 // console.log(...this.tableStructure);
                 if(!this.flag){
                     this.selectedRow = this.tableStructure[0];
-                    console.log(this.selectedRow);
                 }
                 this.flag = true;
             }
             this.indexDbHeader["pages"] = length;
             fileReader.readAsText(this.dataURItoBlob(dataURI, true));
+            this.checkBoxValue.push(false);
         }
         this.indexDbHeader = {
             types,
@@ -192,6 +285,7 @@ export class AppComponent implements OnInit {
             length,
             date : this.timestampToDate(Date.now())
         }
+        console.log(this.checkBoxValue);
     }
 
     openDialog(): void {
@@ -201,7 +295,13 @@ export class AppComponent implements OnInit {
         });
     
         dialogRef.afterClosed().subscribe(result => {
-            console.log('The dialog was closed');
+            if(!result) return;
+            
+            if(this.isDbNameTaken(result) == true){
+                if(confirm("Database Name is Already Taken. Are you sure want to continue?"))
+                    this.openDialog();
+                return;
+            }
             this.indexDbName = result;
             console.log(this.indexDbName);
 
@@ -246,7 +346,6 @@ export class AppComponent implements OnInit {
         this.indexDbContent.datauri = [];
         this.indexDbContent.filename = [];
         this.dbfullcontent = [];
-        
     }
 
     public onIndexDbDelete(){
@@ -306,10 +405,52 @@ export class AppComponent implements OnInit {
         console.log('=================', this.indexDbContent);
         this.selectedFiles = Array.from(selectedFiles.files).map(file => file.webkitRelativePath);
         // console.log(this.selectedFiles);
-     
+    
         //The Db name dialog open.
         this.indexDbName = this.selectedFiles[0].split('/')[0];
         this.openDialog();
+    }
+    
+    public onFromWeb(){
+        let dialogRef = this.dialog.open(WizardoneComponent, {
+            width: '350px',
+            // height: '450px',
+            data: this.indexDbList
+        });
+        dialogRef.afterClosed().subscribe(result => {
+            if(!result) return;
+            if(result.option1 == 1){
+                console.log(result.list[0]);
+                // Textract.fromUrl(result.list[0], function( error, text ) {
+                //     console.log(text);
+                // });
+                // var crawler = new Crawler().configure({ ignoreRelative: true, depth: 1  });
+                
+                // for(let i in result) {
+                //     crawler.crawl({
+                //         url: result[i],
+                //         success: function(page) {
+                //             console.log(page.url);
+                //         },
+                //         failure: function(page) {
+                //             console.log(page.status);
+                //         },
+                //         finished: function(crawledUrls) {
+                //             console.log(crawledUrls);
+                //             textract.fromUrl(crawledUrls[0], function( error, text ) {
+                //                 console.log(text);
+                //             });                            
+                //         }
+                //     });
+                // }
+            } else if(result.option1 == 1){
+                if(result.option2 == 1){   // Of domain
+
+                } else if(result.option2 == 2){  //Regex
+
+                }
+            }
+        });
     }
 
     public onIndexDbClick(item : any){
@@ -318,24 +459,254 @@ export class AppComponent implements OnInit {
         console.log(item);
     }
 
-    public insert() {
-        if(this.form.username && this.form.firstname && this.form.lastname) {
-            this.database.put(this.form.username, this.form);
-            this.form = {
-                "username": "",
-                "firstname": "",
-                "lastname": ""
+    public onFusionDb(){
+        let dialogRef = this.dialog.open(FusiondialogComponent, {
+            width: '350px',
+            height: '450px',
+            data: this.indexDbList
+        });
+        dialogRef.afterClosed().subscribe(result => {
+            if(!result) return;
+            var i, j;
+            var resarray = [];
+            for(i = 0; i < this.indexDbList.length; i++){
+                for(j = 0; j < this.indexDbList[i].length; j++){
+                    if(result[this.indexDbList[i][j].dbname]){
+                        let temp : any;
+                        temp = new DbStructure();
+                        this.CopyDbStructure(this.indexDbList[i][j], temp);
+                        resarray.push(temp);
+                    }
+                }
+            }
+            var newitem: any;
+            newitem = new DbStructure();
+            newitem.dbname = result["myfusiondbname"];
+            for(i in resarray){
+                for(j in resarray[i].datauri){
+                    newitem.datauri.push(resarray[i].datauri[j]);
+                    newitem.date.push(resarray[i].date[j]);
+                    newitem.filename.push(resarray[i].filename[j]);
+                }
+            }
+            this.database.put(newitem.dbname, newitem);
+            this.indexDbList[Math.floor(this.indexDbLength / 4)].push(newitem);
+            this.indexDbLength += 1;
+            console.log(newitem);
+        });
+    }
+    public onIndexDbDuplicate() {
+        let dialogRef = this.dialog.open(DbnamedialogComponent, {
+            width: '350px',
+            data: { dbname: this.selectedIndexDbName + '.bak' }
+        });
+
+        dialogRef.afterClosed().subscribe(result => {
+            var i, j;
+            var temp : any;
+            console.log(result);
+            if(!result) return;
+
+            if(this.isDbNameTaken(result) == true) {
+                if(confirm("Database Name is Already Taken. Are you sure want to continue?"))
+                    this.onIndexDbDuplicate();
+                return;
+            }
+            temp = new DbStructure();
+            for(i = 0; i < this.indexDbList.length; i++){
+                for(j = 0; j < this.indexDbList[i].length; j++){
+                    if(this.indexDbList[i][j].dbname == this.selectedIndexDbName){
+                        this.CopyDbStructure(this.indexDbList[i][j], temp);
+                        temp.dbname = result;
+                        console.log(this.indexDbList[i][j]);
+                        if(this.indexDbLength % 4 == 0){
+                            this.indexDbList.push([]);
+                        }
+
+                        this.database.put(temp.dbname, temp);
+
+                        this.indexDbList[Math.floor(this.indexDbLength / 4)].push(temp);
+                        this.indexDbLength += 1;
+                        
+                        break;
+                    }
+                }
+            }
+        });
+    }
+
+    formmouseover(event){
+        if(this.mouseFlag && event.shiftKey){
+            console.log(event);
+            event.srcElement.checked =! event.srcElement.checked;
+            let num = +event.srcElement.id;
+            console.log(num - 1);
+            if(num != 0){
+                this.checkBoxValue[num - 1] = event.srcElement.checked;
+                this.handleChange(event);
             }
         }
     }
+    formmousedown(event){
+        this.mouseFlag = true;
+    }
+    formmouseup(event){
+        console.log(this.checkBoxValue);
+    }
 
-    public dataURItoBlob(dataURI, toFile) {
+    handleChange(e){
+        var content : string= "";
+        var count = 0;
+        for(let i in this.checkBoxValue)
+            if(this.checkBoxValue[i]) {
+                content += this.tableStructure[i].fullcontent.toString();
+                count++;
+            }
+        let temptable = new TableDataStructure();
+        temptable.fullcontent = content;
+        this.onTableRowSelect(temptable, true);
+    }
+
+    onsearchterm(event){
+        if(event.keyCode == 13){
+            this.concordancerStructure = [];
+            for(let i in this.tableStructure){
+                var temp = -1;
+                console.log(this.tableStructure[i].url);
+                do{
+                    temp = this.tableStructure[i].fullcontent.indexOf(this.searchterm, temp + 1);
+                    if(temp != -1){
+                        console.log('AAAA');
+                        let tempcon = new ConcordancerStructure;
+                        let tablefullcontent = this.tableStructure[i].fullcontent;
+                        tempcon.url = this.tableStructure[i].url;
+                        tempcon.left_context = ( temp - 10 ) >= 0 
+                                                ? "..." + tablefullcontent.substr(temp-10, 10) 
+                                                : tablefullcontent.substr(0, temp);
+                        tempcon.right_context = ( temp + this.searchterm.length + 10) <= tablefullcontent.length 
+                                                ? tablefullcontent.substr(temp+this.searchterm.length, 10) + "..."
+                                                : tablefullcontent.substr(temp+this.searchterm.length, tablefullcontent.length - temp-this.searchterm.length);
+                        tempcon.search_terms = this.searchterm;
+                        tempcon.datauri = this.tableStructure[i].datauri;
+                        this.concordancerStructure.push(tempcon);
+                    }
+                }while(temp >= 0);
+            }
+            this.concordancerdataSource = new MatTableDataSource<ConcordancerStructure>(this.concordancerStructure);
+            this.concordancerdataSource.sort = this.concordancersort;
+        }
+    }
+
+    onstop(){
+        if(this.subscription == undefined){
+            alert("Not Exporting");
+        } else if(this.subscription.closed) {
+            alert("Not Exporting");
+        } else {
+            this.subscription.unsubscribe();
+            console.log(this.subscription);
+        }
+    }
+
+    onexport(){
+        // if(this.subscription != undefined)
+        //     this.subscription.unsubscribe();
+        if(this.optionvalue1 == undefined || this.optionvalue2 == undefined || this.optionvalue3 == undefined){
+            alert("Check all the selections!");
+            return;
+        }
+        if(this.selectedIndexDbName == "") {
+            alert( "No Index DB, Please Add Index DB");
+            return;
+        }
+
+        this.concordancerProgress = 0;
+        console.log(this.selectedIndexDbName);
+
+        var i, j;
+        for(i in this.indexDbList)
+            for(j in this.indexDbList[i]){
+                if(this.indexDbList[i][j].dbname == this.selectedIndexDbName){
+                    break;
+                }
+            }
+        var datauriformat = ["data:text/plain;base64,", "data:text/html;charset=utf-8;base64,", "data:text/csv;charset=utf-8;base64,", ]
+        var blobcontenttype = ["text/plain", "text/html", "text/csv"];
+        var selectedDb = this.indexDbList[i][j];
+
+        var datauri;
+        if(this.optionvalue1 == 1){   // all
+            if(this.optionvalue3 == 1){  //combined file
+                var dbcontent = "";
+                var mimeType = "plain/text";
+                console.log(this.dbfullcontent);
+                for(let i in this.dbfullcontent){
+                    dbcontent += this.dbfullcontent[i];
+                }
+                var byteNumbers = new Array(dbcontent.length);
+                for (i = 0; i < dbcontent.length; i++) {
+                    byteNumbers[i] = dbcontent.charCodeAt(i);
+                }
+                var byteArray = new Uint8Array(byteNumbers);
+                var blob = new Blob([byteArray], {type: blobcontenttype[this.optionvalue2 - 1]});
+                var a = new FileReader();
+                a.onload = () => {
+                    console.log(a.result);
+                    this.downloadURI(a.result, this.selectedIndexDbName, 100);
+                }
+                a.readAsDataURL(blob);
+            } else if(this.optionvalue3 == 2) { // 1 file per url
+                let length = selectedDb.datauri.length;
+                let timer = TimerObservable.create(2000, 200);
+                this.subscription = timer.subscribe(t => {
+                    console.log(t);
+                   
+                    if(t == length){
+                        this.concordancerProgress = 100;
+                        this.subscription.unsubscribe();
+                        console.log("BREAK");
+                        return;
+                    }
+                    let progvalue =  Math.ceil(t * (100 / length));
+                    this.downloadURI(selectedDb.datauri[t], selectedDb.filename[t], progvalue);
+                    
+                });
+            }
+        } else {
+            var filename;
+            if(this.optionvalue1 ==  2 && this.selectedRow.datauri != undefined){ // 
+                datauri = this.selectedRow.datauri;
+                filename = this.selectedRow.url;
+            } else if(this.optionvalue1 == 3 && this.concordancerSelectedRow.datauri != undefined){
+                datauri = this.concordancerSelectedRow.datauri;
+                filename = this.concordancerSelectedRow.url;
+            }
+
+            datauri = datauri.split("data:text/plain;base64,").join("");
+            datauri = datauriformat[this.optionvalue2 - 1] + datauri;
+            this.downloadURI(datauri, filename, 100);
+        }
+    }
+
+    downloadURI(uri, name, progvalue) {
+        var link = document.createElement("a");
+        link.download = name;
+        link.href = uri;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        this.concordancerProgress = progvalue;
+        this.concordancerProgressFileName = name;
+        console.log(name);
+    }
+
+    dataURItoBlob(dataURI, toFile) {
         // get the base64 data
         var data = dataURI.split(',')[1];
 
         // user may provide mime type, if not get it from data URI
         var mimeType = dataURI.split(',')[0].split(':')[1].split(';')[0];
-      
+
         // default to plain/text if data URI has no mimeType
         if (mimeType == null) {
           mimeType = 'plain/text';
@@ -356,5 +727,22 @@ export class AppComponent implements OnInit {
     timestampToDate(timestamp) :string{
         var t = new Date(timestamp);
         return t.getFullYear()+'-'+(t.getMonth()+1)+'-'+t.getDate();
+    }
+
+    isDbNameTaken(name: string){
+        var i, j;
+        var isTaked : boolean = false;
+        for(i = 0; i < this.indexDbList.length; i++){
+            for(j = 0; j < this.indexDbList[i].length; j++){
+                if(this.indexDbList[i][j].dbname == name){
+                    isTaked = true;
+                    break;
+                }
+            }
+        }
+        return isTaked;
+    }
+    delay(ms: number) {
+        return new Promise(resolve => setTimeout(resolve, ms));
     }
 }
