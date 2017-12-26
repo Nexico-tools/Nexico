@@ -1,0 +1,7 @@
+<div style = "margin-top: 30px; margin-left: 30px">
+    <span>{{urltaking}}</span>
+    <mat-progress-bar mode="determinate" [value] = "crawlProgress"></mat-progress-bar>
+    <mat-dialog-actions style = "float: right">
+        <button mat-button (click)="onStop()" tabindex="-1">Stop</button>
+    </mat-dialog-actions>
+</div>

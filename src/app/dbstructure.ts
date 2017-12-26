@@ -1,13 +1,16 @@
 export class DbStructure {
+    public datatype : boolean;  // True : From Web, False : From Folder
+    public htmldata : Array<any>
     public dbname : string;
     public filename : Array<any>;
     public datauri : Array<any>;
-    public date : Array<any>
+    public date : Array<any>;
     constructor (){
         this.dbname = "";
         this.filename = [];
         this.datauri = [];
         this.date = [];
+        this.htmldata = [];
     }
 }
 
@@ -20,6 +23,7 @@ export class TableDataStructure{
     date: string;
     fullcontent: string;
     datauri : string;
+    htmldata : string;
     constructor(){
         this.id = 0;
         this.url = "";
@@ -29,6 +33,7 @@ export class TableDataStructure{
         var t = new Date(Date.now());
         this.date = t.getFullYear()+'-'+(t.getMonth()+1)+'-'+t.getDate();
         this.fullcontent = "";
+        this.htmldata = "";
     }
 }
 export class AnalysisDataStructure{
@@ -50,7 +55,7 @@ export class ConcordancerStructure{
     search_terms: string;
     right_context: string;
     datauri : string;
-   
+    htmldata: string;
     constructor(){
         this.url = "";
         this.left_context = "";

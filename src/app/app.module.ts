@@ -13,18 +13,21 @@ import { MatTabsModule, MatDialogModule, MatButtonModule, MatInputModule, MatTab
 import { DbnamedialogComponent } from './dbnamedialog/dbnamedialog.component';
 import { FusiondialogComponent } from './fusiondialog/fusiondialog.component';
 import { WizardoneComponent } from './wizardone/wizardone.component';
+import { WizardtwoComponent } from './wizardtwo/wizardtwo.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     DbnamedialogComponent,
     FusiondialogComponent,
-    WizardoneComponent
+    WizardoneComponent,
+    WizardtwoComponent
   ],
   entryComponents: [
     DbnamedialogComponent,
     FusiondialogComponent,
-    WizardoneComponent 
+    WizardoneComponent,
+    WizardtwoComponent
   ],
   imports: [
     BrowserModule,

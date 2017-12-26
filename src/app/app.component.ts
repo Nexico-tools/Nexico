@@ -13,7 +13,9 @@ import {Subscription} from "rxjs";
 import {TimerObservable} from "rxjs/observable/TimerObservable";
 
 import { Stat } from './config/Stat';
-import * as Crawler from 'js-crawler';
+// import * as Crawler from 'js-crawler';
+// import { htmlToPlainText } from './config/textversion';
+import { WizardtwoComponent } from './wizardtwo/wizardtwo.component';
 // const toFile = require('data-uri-to-file');
 
 @Component({
@@ -33,6 +35,7 @@ export class AppComponent implements OnInit {
     public selectedFiles;
 
     public indexDbList:Array<Array<any>>;
+    public dataTypeStatus : boolean;
     public indexDbLength : number = 0;
     public indexDbName : string = "AAAA";
     selectedIndexDbName : string = "";
@@ -62,13 +65,13 @@ export class AppComponent implements OnInit {
     concordancerdataSource : any;
     concordancerColumns = ['url', 'left_context', 'search_terms', 'right_context'];
     concordancerSelectedRow : ConcordancerStructure;
-    concordancerProgress : number;
-    concordancerProgressFileName : string;
+    exportProgress : number;
+    exportProgressFileName : string;
     //Export Tab Variable
     optionvalue1 : any;
     optionvalue2 : any;
     optionvalue3 : any;
-
+    selectedIndexDb : any;
     // Timer
 
     private subscription: Subscription;
@@ -89,8 +92,8 @@ export class AppComponent implements OnInit {
         };
 
         this.concordancerdataSource = new MatTableDataSource<ConcordancerStructure>(this.concordancerStructure);
-        this.concordancerProgress = 0;
-        this.concordancerProgressFileName = "";
+        this.exportProgress = 0;
+        this.exportProgressFileName = "";
     }
 
     public ngOnInit() {
@@ -113,6 +116,7 @@ export class AppComponent implements OnInit {
             this.indexDbLength = result.rows.length;
             if(this.indexDbLength != 0){
                 this.selectedIndexDbName = this.indexDbList[0][0].dbname;
+                this.dataTypeStatus = this.indexDbList[0][0].datatype;
                 this.getTableStructure(this.indexDbList[0][0]);
             }
         },
@@ -224,6 +228,7 @@ export class AppComponent implements OnInit {
                 item.url = temp.filename[i].slice(0,39) + '......' + temp.filename[i].slice(temp.filename[i].length - 40, temp.filename[i].length);
             item.date = temp.date[i];
             item.datauri = temp.datauri[i];
+            item.htmldata = temp.htmldata[i];
             const dataURI = temp.datauri[i];
             const fileReader = new FileReader();
             fileReader.onload = () => {
@@ -298,7 +303,7 @@ export class AppComponent implements OnInit {
             if(!result) return;
             
             if(this.isDbNameTaken(result) == true){
-                if(confirm("Database Name is Already Taken. Are you sure want to continue?"))
+                if(confirm("Database Name is Already Taken. Please provide a different name"))
                     this.openDialog();
                 return;
             }
@@ -333,11 +338,13 @@ export class AppComponent implements OnInit {
     }
 
     CopyDbStructure(from : DbStructure, copyTo: DbStructure){
+        copyTo.datatype = from.datatype;
         copyTo.dbname = from.dbname;
         for(var i = 0; i < from.datauri.length; i++){
             copyTo.filename.push(from.filename[i]);
             copyTo.datauri.push(from.datauri[i]);
             copyTo.date.push(from.date[i]);
+            copyTo.htmldata.push(from.htmldata[i]);
         }
     }
 
@@ -383,6 +390,7 @@ export class AppComponent implements OnInit {
             // Hnadle error statuses here
         }
         this.ClearIndexDbContent();
+        this.dataTypeStatus = false;
 
         for(var i = 0; i < selectedFiles.files.length; i++)
         {
@@ -397,6 +405,7 @@ export class AppComponent implements OnInit {
                 }
                 this.indexDbContent.date.push(this.timestampToDate(selectedFiles.files[i].lastModifiedDate));
                 this.indexDbContent.filename.push(selectedFiles.files[i].name);
+                this.indexDbContent.htmldata.push("");
                 // console.log(fileReader.readAsDataURL(selectedFiles.files[i]));
                 // fileReader.readAsText(selectedFiles.files[i]);
                 fileReader.readAsDataURL(selectedFiles.files[i]);
@@ -413,48 +422,49 @@ export class AppComponent implements OnInit {
     
     public onFromWeb(){
         let dialogRef = this.dialog.open(WizardoneComponent, {
-            width: '350px',
-            // height: '450px',
+            width: '700px',
+            height: '600px',
             data: this.indexDbList
         });
         dialogRef.afterClosed().subscribe(result => {
             if(!result) return;
-            if(result.option1 == 1){
-                console.log(result.list[0]);
-                // Textract.fromUrl(result.list[0], function( error, text ) {
-                //     console.log(text);
-                // });
-                // var crawler = new Crawler().configure({ ignoreRelative: true, depth: 1  });
-                
-                // for(let i in result) {
-                //     crawler.crawl({
-                //         url: result[i],
-                //         success: function(page) {
-                //             console.log(page.url);
-                //         },
-                //         failure: function(page) {
-                //             console.log(page.status);
-                //         },
-                //         finished: function(crawledUrls) {
-                //             console.log(crawledUrls);
-                //             textract.fromUrl(crawledUrls[0], function( error, text ) {
-                //                 console.log(text);
-                //             });                            
-                //         }
-                //     });
-                // }
-            } else if(result.option1 == 1){
-                if(result.option2 == 1){   // Of domain
+            
+            let dialogTwo = this.dialog.open(WizardtwoComponent,{
+                width: '700px',
+                height: '150px',
+                data: result
+            });
+            dialogTwo.afterClosed().subscribe(res => {
+                if(!res) return;
+                console.log(res);
+                this.openNameDialog(res);
+            });
 
-                } else if(result.option2 == 2){  //Regex
-
-                }
-            }
         });
     }
-
-    public onIndexDbClick(item : any){
+    openNameDialog(res) {
+        let dialogName = this.dialog.open(DbnamedialogComponent, {
+            width: '350px',
+            data: { dbName : "From Web" }
+        });
+        dialogName.afterClosed().subscribe(resname => {
+            if(!resname) return;
+            if(this.isDbNameTaken(resname) == true){
+                if(confirm("Database Name is Already Taken. Please provide a different name"))
+                    this.openNameDialog(res);
+                return;
+            }
+            res.dbname = resname;
+            if(this.indexDbLength % 4 == 0)
+                this.indexDbList.push([]);
+            this.indexDbList[Math.floor(this.indexDbLength / 4)].push(res);
+            this.database.put(res.dbname, res);
+        });
+    }
+    public onIndexDbClick(item : any) {
+        this.selectedIndexDb = item;
         this.selectedIndexDbName = item.dbname;
+        this.dataTypeStatus = item.datatype;
         this.getTableStructure(item);
         console.log(item);
     }
@@ -483,12 +493,16 @@ export class AppComponent implements OnInit {
             newitem = new DbStructure();
             newitem.dbname = result["myfusiondbname"];
             for(i in resarray){
+                if(resarray[i].datatype)
+                    this.dataTypeStatus = true;
                 for(j in resarray[i].datauri){
                     newitem.datauri.push(resarray[i].datauri[j]);
                     newitem.date.push(resarray[i].date[j]);
                     newitem.filename.push(resarray[i].filename[j]);
+                    newitem.htmldata.push(resarray[i].htmldata[j]);
                 }
             }
+            newitem.datatype = this.dataTypeStatus;
             this.database.put(newitem.dbname, newitem);
             this.indexDbList[Math.floor(this.indexDbLength / 4)].push(newitem);
             this.indexDbLength += 1;
@@ -527,7 +541,7 @@ export class AppComponent implements OnInit {
 
                         this.indexDbList[Math.floor(this.indexDbLength / 4)].push(temp);
                         this.indexDbLength += 1;
-                        
+
                         break;
                     }
                 }
@@ -549,9 +563,33 @@ export class AppComponent implements OnInit {
     }
     formmousedown(event){
         this.mouseFlag = true;
+        console.log("this mousedown", this);
     }
-    formmouseup(event){
-        console.log(this.checkBoxValue);
+    formmouseup(e){
+        if(e.ctrlKey){
+            var content : string= "";
+            var count = 0;
+            for(let i in this.checkBoxValue)
+                if(this.checkBoxValue[i]) {
+                    content += this.tableStructure[i].fullcontent.toString();
+                    count++;
+                }
+            let temptable = new TableDataStructure();
+            temptable.fullcontent = content;
+            this.onTableRowSelect(temptable, true);
+        }else{
+            console.log("handlechange", this);
+            let num = e.srcElement.id;
+            let state = this.checkBoxValue[num -1];
+            console.log("state", state);
+            var content : string= "";
+            var count = 0;
+            for(let i in this.checkBoxValue)
+                this.checkBoxValue[i] = false;
+             
+            console.log("checkboxvalue", this.checkBoxValue[num-1], e.srcElement);
+        }
+        console.log("this.checkBoxValue",this.checkBoxValue, "event", e);
     }
 
     handleChange(e){
@@ -565,8 +603,9 @@ export class AppComponent implements OnInit {
         let temptable = new TableDataStructure();
         temptable.fullcontent = content;
         this.onTableRowSelect(temptable, true);
+        
+        console.log("this.checkBoxValue",this.checkBoxValue, "event", e);
     }
-
     onsearchterm(event){
         if(event.keyCode == 13){
             this.concordancerStructure = [];
@@ -588,6 +627,7 @@ export class AppComponent implements OnInit {
                                                 : tablefullcontent.substr(temp+this.searchterm.length, tablefullcontent.length - temp-this.searchterm.length);
                         tempcon.search_terms = this.searchterm;
                         tempcon.datauri = this.tableStructure[i].datauri;
+                        tempcon.htmldata = this.tableStructure[i].htmldata;
                         this.concordancerStructure.push(tempcon);
                     }
                 }while(temp >= 0);
@@ -620,28 +660,29 @@ export class AppComponent implements OnInit {
             return;
         }
 
-        this.concordancerProgress = 0;
+        this.exportProgress = 0;
         console.log(this.selectedIndexDbName);
 
-        var i, j;
-        for(i in this.indexDbList)
-            for(j in this.indexDbList[i]){
-                if(this.indexDbList[i][j].dbname == this.selectedIndexDbName){
-                    break;
-                }
-            }
         var datauriformat = ["data:text/plain;base64,", "data:text/html;charset=utf-8;base64,", "data:text/csv;charset=utf-8;base64,", ]
         var blobcontenttype = ["text/plain", "text/html", "text/csv"];
-        var selectedDb = this.indexDbList[i][j];
+        var extensiontype = [".txt", ".html", ".csv"];
 
-        var datauri;
-        if(this.optionvalue1 == 1){   // all
-            if(this.optionvalue3 == 1){  //combined file
+        var datauri, i;
+        var selectedDb = this.selectedIndexDb;
+        console.log(selectedDb);
+        if(this.optionvalue1 == 1) {   // all
+            if(this.optionvalue3 == 1) {  // combined file
                 var dbcontent = "";
                 var mimeType = "plain/text";
-                console.log(this.dbfullcontent);
-                for(let i in this.dbfullcontent){
-                    dbcontent += this.dbfullcontent[i];
+                if(this.optionvalue2 == 2) {
+                    console.log(selectedDb.htmldata);
+                    for(let i in selectedDb.htmldata){
+                        dbcontent += selectedDb.htmldata[i];
+                    }
+                } else {
+                    for(let i in this.dbfullcontent){
+                        dbcontent += this.dbfullcontent[i];
+                    }
                 }
                 var byteNumbers = new Array(dbcontent.length);
                 for (i = 0; i < dbcontent.length; i++) {
@@ -652,7 +693,7 @@ export class AppComponent implements OnInit {
                 var a = new FileReader();
                 a.onload = () => {
                     console.log(a.result);
-                    this.downloadURI(a.result, this.selectedIndexDbName, 100);
+                    this.downloadURI(a.result, this.selectedIndexDbName + extensiontype[this.optionvalue2 - 1], 100);
                 }
                 a.readAsDataURL(blob);
             } else if(this.optionvalue3 == 2) { // 1 file per url
@@ -660,31 +701,68 @@ export class AppComponent implements OnInit {
                 let timer = TimerObservable.create(2000, 200);
                 this.subscription = timer.subscribe(t => {
                     console.log(t);
-                   
                     if(t == length){
-                        this.concordancerProgress = 100;
+                        this.exportProgress = 100;
                         this.subscription.unsubscribe();
                         console.log("BREAK");
                         return;
                     }
                     let progvalue =  Math.ceil(t * (100 / length));
-                    this.downloadURI(selectedDb.datauri[t], selectedDb.filename[t], progvalue);
-                    
+
+                    if(this.optionvalue2 == 2){
+                        var byteNumbers = new Array(selectedDb.htmldata[t].length);
+                        for (i = 0; i < selectedDb.htmldata[t].length; i++) {
+                            byteNumbers[i] = selectedDb.htmldata[t].charCodeAt(i);
+                        }
+                        var byteArray = new Uint8Array(byteNumbers);
+                        var blob = new Blob([byteArray], { type: blobcontenttype[this.optionvalue2 - 1]});
+                        var a = new FileReader();
+                        a.onload = () => {
+                            this.downloadURI(a.result, selectedDb.filename[t] + '.html', progvalue);
+                        }
+                        a.readAsDataURL(blob);
+                    } else {
+                        this.downloadURI(selectedDb.datauri[t], selectedDb.filename[t] + extensiontype[this.optionvalue2 - 1], progvalue);
+                    }
                 });
             }
         } else {
             var filename;
+            var selectedhtmldata;
+            var isPassed = false;
             if(this.optionvalue1 ==  2 && this.selectedRow.datauri != undefined){ // 
+                selectedhtmldata = this.selectedRow.htmldata;
                 datauri = this.selectedRow.datauri;
                 filename = this.selectedRow.url;
+                isPassed = true;
             } else if(this.optionvalue1 == 3 && this.concordancerSelectedRow.datauri != undefined){
+                selectedhtmldata = this.concordancerSelectedRow.htmldata;
                 datauri = this.concordancerSelectedRow.datauri;
                 filename = this.concordancerSelectedRow.url;
+                isPassed = true;
             }
-
-            datauri = datauri.split("data:text/plain;base64,").join("");
-            datauri = datauriformat[this.optionvalue2 - 1] + datauri;
-            this.downloadURI(datauri, filename, 100);
+            if(isPassed){
+                if(this.optionvalue2 == 2){
+                    var byteNumbers = new Array(selectedhtmldata.length);
+                    for (i = 0; i < selectedhtmldata.length; i++) {
+                        byteNumbers[i] = selectedhtmldata.charCodeAt(i);
+                    }
+                    var byteArray = new Uint8Array(byteNumbers);
+                    var blob = new Blob([byteArray], { type: blobcontenttype[this.optionvalue2 - 1]});
+                    var a = new FileReader();
+                    a.onload = () => {
+                        console.log('++++++++++++++++++++');
+                        console.log(a.result);
+                        this.downloadURI(a.result, filename + extensiontype[this.optionvalue2 - 1] , 100);
+                    }
+                    a.readAsDataURL(blob);
+                } else {
+                    console.log(datauri);
+                    datauri = datauri.split("data:text/plain;base64,").join("");
+                    datauri = datauriformat[this.optionvalue2 - 1] + datauri;
+                    this.downloadURI(datauri, filename + extensiontype[this.optionvalue2 - 1], 100);
+                }
+            }
         }
     }
 
@@ -695,8 +773,8 @@ export class AppComponent implements OnInit {
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
-        this.concordancerProgress = progvalue;
-        this.concordancerProgressFileName = name;
+        this.exportProgress = progvalue;
+        this.exportProgressFileName = name;
         console.log(name);
     }
 

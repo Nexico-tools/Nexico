@@ -240,7 +240,7 @@
                                       <div class = "col-sm-3">
                                           <mat-radio-group style = "display: grid" [(ngModel)] = "optionvalue2">
                                               <mat-radio-button value="1" style="margin-top: 20px">text</mat-radio-button>
-                                              <mat-radio-button value="2" style="margin-top: 20px">HTML</mat-radio-button>
+                                              <mat-radio-button *ngIf = "dataTypeStatus" value="2" style="margin-top: 20px">HTML</mat-radio-button>
                                               <mat-radio-button value="3" style="margin-top: 20px; margin-bottom: 20px">CSV</mat-radio-button>
                                           </mat-radio-group>
                                       </div>
@@ -257,8 +257,8 @@
   
                                   <div style = "width: 500px; margin: auto; margin-top: 50px; height: 100px;">
                                       <button mat-button style = "margin-bottom: 10px;background-color:#4f6f9c; color: white; float:right" (click) = "onstop()">Stop</button>
-                                      <label style = "vertical-align: text-bottom">Currently Exporting {{ concordancerProgressFileName }}</label>
-                                      <mat-progress-bar mode="determinate" [value] = "concordancerProgress"></mat-progress-bar>
+                                      <label style = "vertical-align: text-bottom">Currently Exporting {{ exportProgressFileName }}</label>
+                                      <mat-progress-bar mode="determinate" [value] = "exportProgress"></mat-progress-bar>
                                   </div>
                               </mat-tab>
                           </mat-tab-group>
