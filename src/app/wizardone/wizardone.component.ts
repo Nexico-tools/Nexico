@@ -12,10 +12,11 @@ export class WizardoneComponent implements OnInit {
 
 	optionvalue : number;
 	optionvalue1 : number;	
-	inputurl : string;
+    inputurl : string;
+    urlarea : string = "";
+    maxnumber : number = 10;
 	inputregexp : string;
-	followlink : boolean;
-	urllist = [];
+    followlink : boolean;
   constructor(
     public dialogRef: MatDialogRef<WizardoneComponent>,
 		@Inject(MAT_DIALOG_DATA) public data: any ) {
@@ -32,7 +33,14 @@ export class WizardoneComponent implements OnInit {
 	}
 
 	onYesClick(): void {
-		if(this.urllist.length == 0){
+        let urllist = [];
+        let temp = this.urlarea.split('\n');
+        for(let i in temp){
+            if(temp[i] != "")
+                urllist.push(temp[i]);
+        }
+        console.log(urllist);
+		if(urllist.length == 0){
 			alert("Please Add Url");
 			return;
 		}
@@ -47,17 +55,18 @@ export class WizardoneComponent implements OnInit {
 		if(this.optionvalue == 2 && this.optionvalue1 == 2 && !this.validateRegExp()){
 			alert("The Regular Expression is not Valid");
 			return;
-		}
+        }
         this.dialogRef.close({
 			"option1" : this.optionvalue,
 			"option2" : this.optionvalue1,
-			"list" : this.urllist,
-			"regexp" : this.inputregexp
+			"list" : urllist,
+            "regexp" : this.inputregexp,
+            "maxnumber" : this.maxnumber
 		});
 	}
 	
-  onNoClick(): void {
-    this.dialogRef.close(false);
+    onNoClick(): void {
+        this.dialogRef.close(false);
 	}
 
 	onAdd() {
@@ -65,7 +74,8 @@ export class WizardoneComponent implements OnInit {
 			alert("The Url is not valid");
 			return;
 		} else {
-			this.urllist = [...this.urllist, this.inputurl];
+            this.urlarea += (this.inputurl + '\n');
+            console.log(this.urlarea);
 		}
 	}
 
