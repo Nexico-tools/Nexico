@@ -138,10 +138,14 @@ export class AppComponent implements OnInit {
         this.analysisStructure = [];
         var stat : any;
         let res = this.selectedRow.fullcontent;
-        
+        console.log(res);
+        var resstring = this.utf16to8(res);
+        console.log(resstring);
+        this.selectedRow.fullcontent = "" + resstring;
+
         let selection = [];
         
-        stat = new Stat(this.dbfullcontent, 5);       
+        stat = new Stat(this.dbfullcontent, 5);
         if(mode){
             let tempfullcontent=[];
             tempfullcontent.push(this.selectedRow.fullcontent);
@@ -461,6 +465,7 @@ export class AppComponent implements OnInit {
             if(this.indexDbLength % 4 == 0)
                 this.indexDbList.push([]);
             this.indexDbList[Math.floor(this.indexDbLength / 4)].push(res);
+            this.indexDbLength += 1;
             this.database.put(res.dbname, res);
             this.concordancerStructure = [];
             this.concordancerdataSource = new MatTableDataSource<ConcordancerStructure>(this.concordancerStructure);
@@ -828,5 +833,25 @@ export class AppComponent implements OnInit {
     }
     delay(ms: number) {
         return new Promise(resolve => setTimeout(resolve, ms));
+    }
+    utf16to8(str) {
+        var out, i, len, c;
+
+        out = "";
+        len = str.length;
+        for(i = 0; i < len; i++) {
+        c = str.charCodeAt(i);
+        if ((c >= 0x0001) && (c <= 0x007F)) {
+            out += str.charAt(i);
+        } else if (c > 0x07FF) {
+            out += String.fromCharCode(0xE0 | ((c >> 12) & 0x0F));
+            out += String.fromCharCode(0x80 | ((c >>  6) & 0x3F));
+            out += String.fromCharCode(0x80 | ((c >>  0) & 0x3F));
+        } else {
+            out += String.fromCharCode(0xC0 | ((c >>  6) & 0x1F));
+            out += String.fromCharCode(0x80 | ((c >>  0) & 0x3F));
+        }
+        }
+        return out;
     }
 }

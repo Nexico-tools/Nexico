@@ -1,14 +1,14 @@
 <h1 mat-dialog-title>Corpus Wizard</h1>
 <div class = "col-sm-6" style = "height: 70%;">
     <mat-dialog-content style = "height: 100%">
-        <mat-form-field style = "width : 100%;">
+        <!-- <mat-form-field style = "width : 100%;">
             <input matInput tabindex="1" [(ngModel)]="inputurl" placeholder="Input the Actual URL" style="margin-top:10px">
         </mat-form-field>
-        <button mat-button (click)= "onAdd()" style="width: 100%;" >Add To Url List</button>
+        <button mat-button (click)= "onAdd()" style="width: 100%;" >Add To Url List</button> -->
         
         <!-- <div style = "height: 200px;border:1px solid black; box-shadow: 2px 2px #888888;"> -->
             <mat-form-field style="width: 100%;">
-                <textarea matInput style="height:150px;" [(ngModel)]="urlarea" placeholder="Leave a comment"></textarea>
+                <textarea matInput style="height:150px;" [(ngModel)]="urlarea" placeholder="URL List"></textarea>
             </mat-form-field>
         <!-- </div> -->
         <mat-radio-group style = "display: grid" [(ngModel)] = "optionvalue" (change) = "onValueChange()">

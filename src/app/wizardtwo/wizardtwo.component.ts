@@ -108,6 +108,8 @@ export class WizardtwoComponent implements OnInit {
                 if(page.url == this.data.list[index] || page.url == (this.data.list[index] + "/"))
                     return;
                 console.log(page.url);
+                if(page.url == this.data.list[index] || page.url == (this.data.list[index] + "/"))
+                    return;
                 let regex;
                 if(this.data.option2 == 2){
                     regex = new RegExp(this.data.regexp);
