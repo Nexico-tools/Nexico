@@ -55,7 +55,7 @@ export class WizardtwoComponent implements OnInit {
                 console.log(page.url);
                 let temp = this.crawlProgress + Math.ceil(100 / Number(this.data.maxnumber));
                 console.log("Temp:" + temp);
-                if(temp >= 100) {
+                if(temp > 100) {
                     this.urltaking = "Crawl Finished(Limited MaxURL)";
                     this.crawlProgress = 100;
                     console.log("return");
@@ -102,6 +102,8 @@ export class WizardtwoComponent implements OnInit {
                 // console.log(plainText);
 
                 console.log(page.url);
+                if(page.url == this.data.list[index] || page.url == (this.data.list[index] + "/"))
+                    return;
                 let regex;
                 if(this.data.option2 == 2){
                     regex = new RegExp(this.data.regexp);
@@ -109,8 +111,8 @@ export class WizardtwoComponent implements OnInit {
                 if(this.data.option2 == 1 || ( this.data.option2 ==2 && regex.test(page.url) )){
                     let temp = this.crawlProgress + Math.ceil(100 / Number(this.data.maxnumber));
                     console.log("Temp:" + temp);
-                    if(temp >= 100) {
-                        this.urltaking = "Crawl Finished(Limited MaxURL)";
+                    if(temp > 100) {
+                        this.urltaking = "Merging data, please wait...";//"Crawl Finished(Limited MaxURL)";
                         this.crawlProgress = 100;
                         console.log("return");
                         return;
