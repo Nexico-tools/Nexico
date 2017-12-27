@@ -22,6 +22,9 @@ export class WizardtwoComponent implements OnInit {
     }
     
     addToDbItem(page, plainText){
+        console.log("decoding");
+        page.content = decodeURIComponent(page.content);
+        console.log("decoded");
         var styleConfig: {
             headingStyle: "indention",
             uIndentionChar: ".";
@@ -45,6 +48,7 @@ export class WizardtwoComponent implements OnInit {
         this.dbItem.date.push(this.timestampToDate(Date.now()))
         a.readAsDataURL(blob);
     }
+
 
     loadURLs( index ) {
         let crawler : any;
@@ -113,7 +117,7 @@ export class WizardtwoComponent implements OnInit {
                     console.log("Temp:" + temp);
                     if(temp > 100) {
                         this.urltaking = "Merging data, please wait...";//"Crawl Finished(Limited MaxURL)";
-                        this.crawlProgress = 95;
+                        this.crawlProgress = 100;
                         console.log("return");
                         return;
                     }
