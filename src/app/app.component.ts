@@ -417,6 +417,10 @@ export class AppComponent implements OnInit {
     
         //The Db name dialog open.
         this.indexDbName = this.selectedFiles[0].split('/')[0];
+
+        this.concordancerStructure = [];
+        this.concordancerdataSource = new MatTableDataSource<ConcordancerStructure>(this.concordancerStructure);
+        this.concordancerdataSource.sort = this.concordancersort;
         this.openDialog();
     }
     
@@ -439,7 +443,6 @@ export class AppComponent implements OnInit {
                 console.log(res);
                 this.openNameDialog(res);
             });
-
         });
     }
     openNameDialog(res) {
@@ -459,6 +462,9 @@ export class AppComponent implements OnInit {
                 this.indexDbList.push([]);
             this.indexDbList[Math.floor(this.indexDbLength / 4)].push(res);
             this.database.put(res.dbname, res);
+            this.concordancerStructure = [];
+            this.concordancerdataSource = new MatTableDataSource<ConcordancerStructure>(this.concordancerStructure);
+            this.concordancerdataSource.sort = this.concordancersort;
         });
     }
     public onIndexDbClick(item : any) {
