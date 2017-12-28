@@ -22,9 +22,9 @@ export class WizardtwoComponent implements OnInit {
     }
     
     addToDbItem(page, plainText){
-        console.log("decoding");
-        page.content = decodeURIComponent(page.content);
-        console.log("decoded");
+        // console.log("decoding");
+        // page.content = decodeURIComponent(page.content);
+        // console.log("decoded");
         var styleConfig: {
             headingStyle: "indention",
             uIndentionChar: ".";

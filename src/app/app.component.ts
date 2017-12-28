@@ -138,9 +138,9 @@ export class AppComponent implements OnInit {
         this.analysisStructure = [];
         var stat : any;
         let res = this.selectedRow.fullcontent;
-        console.log(res);
+        // console.log(res);
         var resstring = this.utf16to8(res);
-        console.log(resstring);
+        // console.log(resstring);
         this.selectedRow.fullcontent = "" + resstring;
 
         let selection = [];
@@ -154,16 +154,19 @@ export class AppComponent implements OnInit {
             this.selectedRow.token = pagestat.nbtokens;
 
             let count = 0, i, j = 0;
+            /* gael : merged with the following loop to speed up
             for(i in this.checkBoxValue){
                 if(this.checkBoxValue[i])
                     count++;
             }
-            console.log("Count"+count);
+            console.log("Count"+count);*/
             this.countPage = count;
             selection = new Array<number>(count); // selection=[0,1];  
             for(i in this.checkBoxValue){
-                if(this.checkBoxValue[i])
+                if(this.checkBoxValue[i]){
                     selection[j++] = i;
+                    count++;
+                }
             }
             console.log("AAAA"+selection);
         }
@@ -578,21 +581,21 @@ export class AppComponent implements OnInit {
     }
     formmouseup(e){
         if(e.ctrlKey){
-            var content : string= "";
-            var count = 0;
-            for(let i in this.checkBoxValue)
-                if(this.checkBoxValue[i]) {
-                    content += this.tableStructure[i].fullcontent.toString();
-                    count++;
-                }
-            let temptable = new TableDataStructure();
-            temptable.fullcontent = content;
-            this.onTableRowSelect(temptable, true);
+            // var content : string= "";
+            // var count = 0;
+            // for(let i in this.checkBoxValue)
+            //     if(this.checkBoxValue[i]) {
+            //         content += this.tableStructure[i].fullcontent.toString();
+            //         count++;
+            //     }
+            // let temptable = new TableDataStructure();
+            // temptable.fullcontent = content;
+            // this.onTableRowSelect(temptable, true);
         }else{
-            console.log("handlechange", this);
+            // console.log("handlechange", this);
             let num = e.srcElement.id;
             let state = this.checkBoxValue[num -1];
-            console.log("state", state);
+            // console.log("state", state);
             var content : string= "";
             var count = 0;
             for(let i in this.checkBoxValue)
