@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Nexico - jQuery UI Selectable - section map proposal</title>
+  <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+
+  <style>
+  body {
+	font-family: Arial, Helvetica, sans-serif;
+}
+
+/*table {
+	font-size: 1em;
+}*/
+
+.ui-draggable, .ui-droppable {
+	background-position: top;
+}
+
+  #feedback { font-size: 1.4em; }
+  #sectionmap .ui-selecting { background: #8EAAD4; }
+  #sectionmap .ui-selected { background: #6284B7; color: white; }
+  #sectionmap { list-style-type: none; margin: 0; padding: 0; width: 100%; }
+  #sectionmap li { margin: 0px; padding: 1px; float: left; width: 20px; height: 20px; font-size: .6em; text-align: center; line-height: 20px;}
+  </style>
+  <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+  <script>
+
+  $( function() {
+
+    // solution for adding shift multi-selection
+    // from https://stackoverflow.com/questions/9374743/enable-shift-multiselect-in-jquery-ui-selectable
+    var prev = -1; // here we will store index of previous selection
+    $( "#sectionmap" ).selectable({
+      //       selected: function(e, ui ) {
+      //         console.log("selected",ui.selected.value );
+      //         },
+      selecting: function(e, ui) { // on select
+          var curr = $(ui.selecting.tagName, e.target).index(ui.selecting); // get selecting item index
+          if(e.shiftKey && prev > -1) { // if shift key was pressed and there is previous - select them all
+            $(ui.selecting.tagName, e.target).slice(Math.min(prev, curr), 1 + Math.max(prev, curr)).addClass('ui-selected');
+            prev = -1; // and reset prev
+            }
+          else {
+            prev = curr; // othervise just save prev
+          }
+        },
+      stop: function(e, ui ) {
+        var selectedValues = $(".ui-selected").map(function(){return $(this).val();}).get();
+        $("#feedback").html("<p>here are the selected squares: "+ selectedValues +"</p>");
+        }
+
+    });
+  } );
+
+
+
+  </script>
+</head>
+<body>
+
+    <ol id="sectionmap">
+      <li id="lis">
+    </ol>
+  <div id="feedback" style="clear:both">
+  Multi-selection with ctrl, shift, mouse-lasso!
+  </div>
+
+  <script>
+    var lis=""
+    for (var i=1;i <= 1111; i++) {
+        lis+='<li class="ui-state-default" title="this is square number '+i+'" value='+i+' >'+i+'</li>'
+    }
+    $( "#lis" ).replaceWith(lis)
+  </script>
+
+
+</body>
+</html>
