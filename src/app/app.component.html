@@ -113,7 +113,7 @@
   
                               <mat-tab label="Section Map">
                                   <!-- <form (keydown)="formkeydown($event)" (keyup)="formkeyup($event)" (mousedown)="formmouseclick($event)" (mousemove)="formmousemove($event)" (mouseup)="formmouseup($event)"> -->
-                                  <form (mousedown)="formmouseup($event)" (mouseover)="formmouseover($event)"> <!--(mouseup)="formmouseup($event)">-->
+                                  <form (mouseup)="formmouseup($event)" (mouseover)="formmouseover($event)"> <!--(mouseup)="formmouseup($event)">-->
                                       <div class = "col-sm-12">
                                           <div *ngFor = "let ele of tableStructure" class="checkbox checkbox-success checkbox-inline" title="{{ele.url}}" style="margin-left: 10px !important">
                                               <input type="checkbox" class="styled hoverselect" id="{{ele.id}}" [(ngModel)] = "checkBoxValue[ele.id-1]" [ngModelOptions]="{standalone: true}" (change)="handleChange($event)">
