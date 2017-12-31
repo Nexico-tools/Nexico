@@ -1,14 +1,14 @@
 ##  Chrome extension for scraping and analyzing textual data
 
-### compiling and installing
+### Compiling and installing
 
-1. `npm install` to install all the dependencies.
-2. After that, on Mac run `ng build` on Linux run  `npm run build` and it will generate the dist folder where the build file is there.
-3. copy background.js and manifest.js from src/assets/ to dist
-4. in Chrome, go to chrome://extensions/ click on "Load unpacked extension..." and choose the dist folder
-5. click on the N that appears next to the address bar.
+1. `github clone https://github.com/Nexico-tools/Nexico.git` and `npm install` to install all the dependencies.
+2. After that, on Mac run `ng build` on Linux run  `npm run build` and it will generate the dist folder with the build file.
+3. copy background.js and manifest.js from src/assets/ to dist.
+4. in Chrome, go to chrome://extensions/ click on "Load unpacked extension..." and choose the dist folder.
+5. click on the N that appears next to the address bar..
 
-### usage
+### Usage
 
 #### text file analysis
 
@@ -19,7 +19,7 @@
 
 You can now click on the squares to see the content and the specific vocabulary of each file. Specificity is computed with Fisher's exact test (cummulative hypergeometric function).
 
-#### web file analysis
+#### Web file analysis
 
 not fully functional yet.
 
