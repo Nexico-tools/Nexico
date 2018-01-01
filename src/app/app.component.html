@@ -6,48 +6,48 @@
     </div>
     <div class = "row">
           <div class = "col-sm-3 divborderstyle">
-  
+
               <div class = "row divhead">
                   <label > Corpora </label>
                   <button type="button" class="btn btn-danger circle" title = "Transform">
                       <!-- <span class="button_text">T</span> -->
                       <i class="glyphicon glyphicon-arrow-right" style ="margin-bottom: 0.5px; margin-left: 0.5px;"></i>
                   </button>
-  
+
                   <button type="button" class="btn btn-danger circle" (click)="onFusionDb()" title = "Fusion Databases">
                       <!-- <span class="button_text">F</span> -->
                       <i class = "glyphicon glyphicon-resize-small"></i>
                   </button>
-  
+
                   <button type="button" class="btn btn-danger circle" (click)="onIndexDbDuplicate()" title= "Duplicate Database">
                       <span>D</span>
                   </button>
-  
+
                   <button type="button" class="btn btn-danger circle" (click)="onIndexDbDelete()" title = "Delete Database">
                       <i class = "glyphicon glyphicon-remove"></i>
                       <!-- <span class="button_text">-</span> -->
           </button>
 
-  
+
           <mat-menu #appMenu="matMenu">
             <ng4-files-click (filesSelect)="filesSelect($event)" title = "Upload a New File" id="ngupload" >
               <div class="btn" style="width: 100%; height:100%; display: inline-grid;">
                 <span mat-menu-item><img src = "/assets/folder.png" style = "width: 30px;">&nbsp; &nbsp;From Folder</span>
             </div>
             </ng4-files-click>
-            
+
             <div class="btn" style="width: 100%; height:100%; display: inline-grid;" (click) = "onFromWeb()">
               <span mat-menu-item><img src = "/assets/web.jpg" style = "width: 30px;">&nbsp; &nbsp;From Web</span>
             </div>
           </mat-menu>
-  
+
           <button type="button" class="btn btn-primary circle" title = "Create Database" [matMenuTriggerFor]="appMenu">
             <i class = "glyphicon glyphicon-plus" style="margin-left: 1.5px"></i>
             <!-- <span class="button_text">-</span> -->
           </button>
-          
+
               </div>
-  
+
               <div class = "row divbody" style = "overflow: auto">
                   <table class = "tablestyle">
                       <thead>
@@ -58,7 +58,7 @@
                             <th class = "col-sm-3"></th>
                           </tr>
                       </thead>
-  
+
                       <tbody>
                           <tr *ngFor = "let i of indexDbList">
                               <td *ngFor = "let j of i">
@@ -84,7 +84,7 @@
                   </table>
               </div>
           </div>
-  
+
           <div class= "col-sm-9 divborderstyle">
               <!-- <h1> Temporary</h1>
               <div *ngIf = "flag">
@@ -103,14 +103,14 @@
                       <span class ="glyphicon glyphicon-cog" style = "font-size : 40px;"></span>
                   </div>
               </div>
-  
-              <div class = "row" style= "height: 780px; margin-top : 20px; margin-left:5px;">
+
+              <div class = "row" style= "height: 100%; margin-top : 20px; margin-left:5px;">
                   <div class = "col-sm-9" style = "height: 100%; background-color : #F4F3F0">
                       <div class = "row" style = "height : 63%; margin-left: 5px;">
                           <mat-tab-group>
-                                  
+
                               <!-- Section Map Tag -->
-  
+
                               <mat-tab label="Section Map">
                                   <!-- <form (keydown)="formkeydown($event)" (keyup)="formkeyup($event)" (mousedown)="formmouseclick($event)" (mousemove)="formmousemove($event)" (mouseup)="formmouseup($event)"> -->
                                   <form (mouseup)="formmouseup($event)" (mouseover)="formmouseover($event)"> <!--(mouseup)="formmouseup($event)">-->
@@ -122,9 +122,9 @@
                                       </div>
                                   </form>
                               </mat-tab>
-  
+
                               <!-- Table Tag -->
-  
+
                               <mat-tab label="Table" style = "height:100%;" matSort="filesort">
                                   <div class="filelist-container mat-elevation-z8">
                                       <mat-table [dataSource]="filedataSource" style = "max-height: 330px;" matSort #filesort = "matSort">
@@ -132,32 +132,32 @@
                                               <mat-header-cell *matHeaderCellDef mat-sort-header style = "max-width: 600px"> URL </mat-header-cell>
                                               <mat-cell *matCellDef="let element" style = "max-width: 600px"> {{element.url}} </mat-cell>
                                           </ng-container>
-  
+
                                           <ng-container matColumnDef="type">
                                               <mat-header-cell *matHeaderCellDef mat-sort-header style = "max-width: 50px"> types </mat-header-cell>
                                               <mat-cell *matCellDef="let element" style = "max-width: 50px"> {{element.type}} </mat-cell>
                                           </ng-container>
-  
+
                                           <ng-container matColumnDef="token">
                                               <mat-header-cell *matHeaderCellDef mat-sort-header style = "max-width: 60px"> tokens </mat-header-cell>
                                               <mat-cell *matCellDef="let element" style = "max-width: 50px"> {{element.token}} </mat-cell>
                                           </ng-container>
-  
+
                                           <ng-container matColumnDef="content">
                                               <mat-header-cell *matHeaderCellDef mat-sort-header style = "max-width: 170px"> content </mat-header-cell>
                                               <mat-cell *matCellDef="let element" style = "max-width: 170px"> {{element.content}} </mat-cell>
                                           </ng-container>
-  
+
                                           <ng-container matColumnDef="date">
                                               <mat-header-cell *matHeaderCellDef mat-sort-header style = "max-width: 90px"> date </mat-header-cell>
                                               <mat-cell *matCellDef="let element" style = "max-width: 100px"> {{element.date}} </mat-cell>
                                           </ng-container>
-                                  
+
                                           <mat-header-row *matHeaderRowDef="displayedColumns" style = "cursor:pointer;"></mat-header-row>
                                           <mat-row *matRowDef="let row; columns: displayedColumns;" (click) = "onTableRowSelect(row, false)" [ngClass] = "{'highlight': selectedRow == row, 'hover':true}" style = "cursor:pointer;"></mat-row>
                                       </mat-table>
                                   </div>
-                                          
+
                                   <div class = "row" style = "margin-top: 10px;">
                                       <div class = "col-sm-8">
                                           <div class="icon-addon addon-sm" style = "width: 200px">
@@ -170,7 +170,7 @@
                                           <button mat-raised-button style = "height:30px; width: 150px;">Delete Others</button>
                                       </div>
                                   </div>
-  
+
                                   <div class = "row" style = "margin-top: 10px">
                                       <div class = "col-sm-3">
                                           <div class="icon-addon addon-sm" style = "width: 200px">
@@ -184,50 +184,50 @@
                                       </div>
                                   </div>
                               </mat-tab>
-  
+
                               <!-- Concordancer Tag -->
-  
+
                               <mat-tab label="Concordancer">
                                   <div class = "row concordancertab">
                                       <div class="icon-addon addon-sm" style = "width: 200px">
                                           <input type="text" placeholder="Search Terms" class="form-control" id="searchterm" (keypress)="onsearchterm($event)" [(ngModel)]="searchterm">
                                           <label for="searchterm" class="glyphicon glyphicon-search" rel="tooltip" title="email"></label>
                                       </div>
-  
+
                                   </div>
-  
+
                                   <div class="filelist-container mat-elevation-z8">
                                       <mat-table [dataSource]="concordancerdataSource" style = "max-height: 330px;" matSort #concordancersort = "matSort">
-                                  
+
                                           <ng-container matColumnDef="url">
                                               <mat-header-cell *matHeaderCellDef mat-sort-header style = "max-width: 600px"> URL </mat-header-cell>
                                               <mat-cell *matCellDef="let element" style = "max-width: 600px"> {{element.url}} </mat-cell>
                                           </ng-container>
-  
+
                                           <ng-container matColumnDef="left_context">
                                               <mat-header-cell *matHeaderCellDef mat-sort-header style = "max-width: 100px"> Left Context </mat-header-cell>
                                               <mat-cell *matCellDef="let element" style = "max-width: 100px"> {{element.left_context}} </mat-cell>
                                           </ng-container>
-  
+
                                           <ng-container matColumnDef="search_terms">
                                               <mat-header-cell *matHeaderCellDef mat-sort-header style = "max-width: 100px"> Search Terms </mat-header-cell>
                                               <mat-cell *matCellDef="let element" style = "max-width: 100px"> {{element.search_terms}} </mat-cell>
                                           </ng-container>
-  
+
                                           <ng-container matColumnDef="right_context" >
                                               <mat-header-cell *matHeaderCellDef mat-sort-header style = "max-width: 100px"> Right Context </mat-header-cell>
                                               <mat-cell *matCellDef="let element" style = "max-width: 100px"> {{element.right_context}} </mat-cell>
                                           </ng-container>
-                                  
+
                                           <mat-header-row *matHeaderRowDef="concordancerColumns" style = "cursor:pointer;"></mat-header-row>
                                           <mat-row *matRowDef="let row; columns: concordancerColumns;"  (click) = "onConcordancer(row)" [ngClass] = "{'highlight': concordancerSelectedRow == row,'hover':true}" style = "cursor:pointer;"></mat-row>
                                       </mat-table>
                                   </div>
-  
+
                            </mat-tab>
-  
+
                               <!-- Export Tag -->
-  
+
                               <mat-tab label="Export">
                                   <div class = "row">
                                       <div class = "col-sm-6">
@@ -254,7 +254,7 @@
                                   <div class = "row" style = "margin: auto; width: 50px;">
                                       <button mat-button style = "background-color:#4f6f9c; color: white" (click)="onexport()">Export</button>
                                   </div>
-  
+
                                   <div style = "width: 500px; margin: auto; margin-top: 50px; height: 100px;">
                                       <button mat-button style = "margin-bottom: 10px;background-color:#4f6f9c; color: white; float:right" (click) = "onstop()">Stop</button>
                                       <label style = "vertical-align: text-bottom">Currently Exporting {{ exportProgressFileName }}</label>
@@ -263,8 +263,8 @@
                               </mat-tab>
                           </mat-tab-group>
                       </div>
-  
-                      
+
+
                       <div class = "row divbluebox">
                           <h2 *ngIf = "flag"> section: {{countPage}} page, {{ selectedRow.type }} types, {{ selectedRow.token }} tokens</h2>
                           <h2 *ngIf = "!flag"> Not Selected Any Item</h2>
@@ -274,7 +274,7 @@
                               <h2 *ngIf = "!flag">No Item Selected</h2>
                       </div>
                   </div>
-  
+
                   <div class ="col-sm-3" >
                       <div class = "row" style = "height : 100%; margin-left: 5px;">
                           <!-- <p-dataTable  [value]="analysisStructure" selectionMode="single" [(selection)] = "selectedAnalysisRow" (onRowSelect) = "onAnalysisTableRowSelect($event)" [style]="{'height':'780px', 'overflow':'auto'}">
@@ -284,29 +284,29 @@
                                   <p-column field="spec" header="spec" [style]="{'width':'27%', 'cursor':'pointer'}" [sortable]="true"></p-column>
                           </p-dataTable> -->
                           <div class="filelist-container mat-elevation-z9">
-                              <mat-table  [dataSource]="analysisdataSource" style = "max-height: 780px;" matSort #analysissort = "matSort">
-                      
+                              <mat-table  [dataSource]="analysisdataSource" style = "max-height: 100%;" matSort #analysissort = "matSort">
+
                                   <!-- Position Column -->
                                   <ng-container matColumnDef="form">
                                           <mat-header-cell *matHeaderCellDef mat-sort-header style = "min-width: 100px"> form </mat-header-cell>
                                           <mat-cell *matCellDef="let ele" style = "min-width: 100px"> {{ele.form}} </mat-cell>
                                   </ng-container>
-  
+
                                   <ng-container matColumnDef="freq">
                                           <mat-header-cell *matHeaderCellDef mat-sort-header> freq </mat-header-cell>
                                           <mat-cell *matCellDef="let ele" > {{ele.freq}} </mat-cell>
                                   </ng-container>
-  
+
                                   <ng-container matColumnDef="total">
                                           <mat-header-cell *matHeaderCellDef mat-sort-header> total </mat-header-cell>
                                           <mat-cell *matCellDef="let ele"> {{ele.total}} </mat-cell>
                                   </ng-container>
-  
+
                                   <ng-container matColumnDef="spec">
                                           <mat-header-cell *matHeaderCellDef mat-sort-header style = "min-width: 80px"> spec </mat-header-cell>
                                           <mat-cell *matCellDef="let ele" style = "min-width: 80px"> {{ele.spec}} </mat-cell>
                                   </ng-container>
-                          
+
                                   <mat-header-row *matHeaderRowDef="analysisColumns" style = "cursor:pointer;"></mat-header-row>
                                   <mat-row *matRowDef="let row; columns: analysisColumns;" (click) = "onAnalysisTableRowSelect(row)" [ngClass] = "{'hover':true}" style = "cursor:pointer;"></mat-row>
                               </mat-table>
@@ -317,4 +317,3 @@
           </div>
     </div>
 </div>
-  

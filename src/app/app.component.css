@@ -1,5 +1,5 @@
 .divborderstyle {
-    height: 800px; 
+    min-height: 100%;
     /* border-style: solid;
     border-color: #666666; */
 }
@@ -103,7 +103,7 @@ table {
     flex-direction: column;
     min-width: 300px;
   }
-  
+
   .mat-table {
     overflow: auto;
   }
@@ -141,7 +141,7 @@ table {
 }
 
 .icon-addon.addon-md .glyphicon,
-.icon-addon .glyphicon, 
+.icon-addon .glyphicon,
 .icon-addon.addon-md .fa,
 .icon-addon .fa {
     position: absolute;
